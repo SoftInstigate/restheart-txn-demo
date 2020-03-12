@@ -1,0 +1,45 @@
+<div class="content mt-1 mb-2">
+  <h1>RESTHeart Txn Demo</h1>
+  <p>MongoDb RESTful Transactions managment</p>
+</div>
+
+<div class="content" role="main">
+  <!-- Resources -->
+  <div class="card-container mt-1">
+    
+
+    <a class="card p-4" target="_blank" rel="noopener" href="https://restheart.org/docs/tutorial">
+      <i class="material-icons text-primary" color="accent">schools</i>
+
+      <span>Learn RESTHeart</span>
+
+      <svg class="material-icons" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>    
+    </a>
+
+    <a class="card p-4" rel="noopener" routerLink="/palettes">
+      <i class="material-icons pr-4" color="accent">directions_run</i>
+      
+      <span>Go to demo</span>
+      
+      <svg class="material-icons" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>    
+    </a>
+</div>
+  
+<h2 class="mt-4 mb-0">Launch RESTHeart</h2>
+<p class="p-0 m-0 text-muted">using Docker</p>
+<div class="terminal">
+  <pre>
+$ curl https://bit.ly/38GetZr --output docker-compose.yml
+$ docker-compose up -d
+  </pre>
+</div>
+
+<h2 class="mt-4 mb-0">Init</h2>
+<p class="p-0 m-0 text-muted">using Httpie</p>
+
+<div class="terminal">
+  <pre>
+$ http -a admin:secret PUT :8080/palettes
+$ http -a admin:secret PUT :8080/colors
+  </pre>
+</div>
