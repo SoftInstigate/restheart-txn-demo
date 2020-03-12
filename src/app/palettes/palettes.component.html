@@ -1,11 +1,7 @@
-<mat-grid-list cols="2" rowHeight="100px" rowWidth="400px">
+<mat-grid-list cols="2" rowHeight="150px" rowWidth="400px">
     <mat-grid-tile
-        *ngFor="let p of palettes | async"
-        [colspan]="'1'"
-        [style.background]="'lightblue'">
-        {{ p | json }}
-
-
-
+        class="p-2 m-2"
+        *ngFor="let p of palettes | async">
+        <app-palette [palette]="p"></app-palette>
     </mat-grid-tile>
   </mat-grid-list>

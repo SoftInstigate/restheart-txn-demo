@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
+import { Palette } from 'src/app/model';
 
 @Component({
   selector: 'app-palette',
@@ -6,6 +7,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./palette.component.css']
 })
 export class PaletteComponent implements OnInit {
+  @Input() palette: Palette;
 
   constructor() { }
 
