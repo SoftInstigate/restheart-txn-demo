@@ -26,3 +26,11 @@
 .toolbar #twitter-logo:hover {
     opacity: 0.8;
 }
+
+a h2 {
+    color: white;
+}
+
+a h2:hover{
+    text-decoration: none;
+}
