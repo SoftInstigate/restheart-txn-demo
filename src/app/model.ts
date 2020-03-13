@@ -14,6 +14,10 @@ export class Palette {
        this._id = _id;
        this.name = name;
     }
+
+    id(): ObjecId {
+        return this._id;
+    }
 }
 
 export class Color {
@@ -25,5 +29,9 @@ export class Color {
        this._id = _id;
        this.name = name;
        this.hex = hex;
+    }
+
+    id(): ObjecId {
+        return this._id;
     }
 }

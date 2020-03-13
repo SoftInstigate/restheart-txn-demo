@@ -1,4 +1,13 @@
-<mat-card>
+<!-- <mat-card>
     <h1>{{palette.name}}</h1>
     <p class="text-muted">{{palette | json }}</p>
-</mat-card>
+    <p *ngFor="let c of colors() | async" class="text-muted">{{c | json }}</p>
+</mat-card> -->
+
+<h2 class="mb-1">{{palette.name}}</h2>
+<div class="flex-container">
+    <div *ngFor="let c of colors() | async" [style.background]="c.hex">
+        <p class="p-1">{{c.hex}}</p>
+    </div>
+</div>
+

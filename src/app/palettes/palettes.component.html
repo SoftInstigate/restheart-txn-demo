@@ -1,7 +1,12 @@
-<mat-grid-list cols="2" rowHeight="150px" rowWidth="400px">
+<mat-grid-list cols="2" rowHeight="150px" rowWidth="800px">
     <mat-grid-tile
-        class="p-2 m-2"
+        class="p-5"
         *ngFor="let p of palettes | async">
         <app-palette [palette]="p"></app-palette>
     </mat-grid-tile>
-  </mat-grid-list>
+    <mat-grid-tile>
+        <button mat-fab color="primary"><mat-icon>add</mat-icon></button>
+    </mat-grid-tile>
+</mat-grid-list>
+
+
