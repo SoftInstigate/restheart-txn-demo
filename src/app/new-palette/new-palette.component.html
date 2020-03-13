@@ -1,1 +1,31 @@
-<p>new-palette works!</p>
+<div class="content">
+    <h1>Create a new Palette</h1>
+
+    <p>Define 5 colors for your palette</p>
+
+    <p>Clicking on create button executes the following writes transaction:</p>
+    <ol>
+        <li>start session</li>
+        <li>start transaction in the session</li>
+        <li>create palette document an obtain _id</li>
+        <li>create 5 random colors documents with reference to the created palette</li>
+        <li>commit transaction</li>
+    </ol>
+
+
+    <button (click)="run()" class="mt-3" mat-raised-button color="warn" routerLink="/new">
+        <mat-icon class="mr-2">device_hub</mat-icon>Create Palette
+    </button>
+</div>
+
+<div class="terminal">
+    <pre>
+{{log}}
+    </pre>
+</div>
+
+<div *ngIf="created">
+    <button class="mt-3" mat-raised-button color="warn" routerLink="/palettes">
+        <mat-icon class="mr-2">arrow_back_ios</mat-icon>Back
+    </button>
+</div>

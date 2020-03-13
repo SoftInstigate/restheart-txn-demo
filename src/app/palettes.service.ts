@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ObjecId, Palette, Color } from 'src/app/model';
+import { ObjectId, Palette, Color } from 'src/app/model';
 import { Observable, of } from 'rxjs';
 
 @Injectable({
@@ -11,23 +11,24 @@ export class PalettesService {
 
   loadPalettes(): Observable<Palette[]> {
     const palettes: Palette[] = [
-      new Palette(new ObjecId('1'), 'palette 1'),
-      new Palette(new ObjecId('2'), 'palette 2'),
-      new Palette(new ObjecId('3'), 'palette 3'),
-      new Palette(new ObjecId('4'), 'palette 4'),
-      new Palette(new ObjecId('5'), 'palette 5')
+      new Palette(new ObjectId('1'), 'palette 1'),
+      new Palette(new ObjectId('2'), 'palette 2'),
+      new Palette(new ObjectId('3'), 'palette 3'),
+      new Palette(new ObjectId('4'), 'palette 4'),
+      new Palette(new ObjectId('5'), 'palette 5'),
+      new Palette(new ObjectId('6'), 'palette 6')
     ];
 
     return of(palettes);
   }
 
-  loadColors(palette: ObjecId): Observable<Color[]> {
+  loadColors(palette: ObjectId): Observable<Color[]> {
     const colors: Color[] = [
-      new Color(new ObjecId('1'), 'green', '#66bb6a'),
-      new Color(new ObjecId('2'), 'blu', '#2196f3'),
-      new Color(new ObjecId('3'), 'lime', '#d4e157'),
-      new Color(new ObjecId('4'), 'red', '#b71c1c'),
-      new Color(new ObjecId('5'), 'pink', '#2196f3')
+      new Color(new ObjectId('1'), 'green', '#66bb6a'),
+      new Color(new ObjectId('2'), 'blu', '#2196f3'),
+      new Color(new ObjectId('3'), 'lime', '#d4e157'),
+      new Color(new ObjectId('4'), 'red', '#b71c1c'),
+      new Color(new ObjectId('5'), 'pink', '#2196f3')
     ];
 
     return of(this.shuffle(colors));

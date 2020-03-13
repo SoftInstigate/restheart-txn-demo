@@ -1,4 +1,4 @@
-export class ObjecId {
+export class ObjectId {
     constructor(oid: string) {
         this.$oid = oid;
      }
@@ -7,31 +7,31 @@ export class ObjecId {
 }
 
 export class Palette {
-    _id: ObjecId;
+    _id: ObjectId;
     name: string;
 
-    constructor(_id: ObjecId, name: string) {
+    constructor(_id: ObjectId, name: string) {
        this._id = _id;
        this.name = name;
     }
 
-    id(): ObjecId {
+    id(): ObjectId {
         return this._id;
     }
 }
 
 export class Color {
-    _id: ObjecId;
+    _id: ObjectId;
     name: string;
     hex: string;
 
-    constructor(_id: ObjecId, name: string, hex: string) {
+    constructor(_id: ObjectId, name: string, hex: string) {
        this._id = _id;
        this.name = name;
        this.hex = hex;
     }
 
-    id(): ObjecId {
+    id(): ObjectId {
         return this._id;
     }
 }
