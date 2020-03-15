@@ -1,3 +1,6 @@
+html {
+    font-size: 24px;
+  }
 
 .content {
     display: flex;
@@ -41,5 +44,5 @@
 }
 
 pre {
-    font-size: 16px;
+    font-size: 18px;
 }
