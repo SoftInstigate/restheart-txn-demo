@@ -1,18 +1,43 @@
 <div class="content">
     <div class="display-5 mb-5">Create a new Palette</div>
 
-    <p>Clicking on create button executes the following writes transaction:</p>
-    <ol>
-        <li>start session</li>
-        <li>start transaction in the session</li>
-        <li>create palette document an obtain _id</li>
-        <li>create 5 random colors documents with reference to the created palette</li>
-        <li>commit transaction</li>
-    </ol>
+    <p>Status</p>
+    <ul>
+        <li>SessionId: {{sid}}</li>
+        <li>Transaction number: {{txn}}</li>
+        <li>Palette id: {{pid?.$oid}}</li>
+        <li>Colors created:{{colorsCreated}}</li>
+    </ul>
 
-    <button (click)="run()" class="mt-3" mat-raised-button color="warn" routerLink="/new">
-        <mat-icon class="mr-2">device_hub</mat-icon>Create Palette
-    </button>
+    <div class="text-center">
+        <button (click)="createSession()" [disabled]="sid" class="mt-3" mat-raised-button routerLink="/new">
+            <mat-icon class="mr-2">folder</mat-icon>Create session
+        </button>
+
+        <button (click)="startTxn(sid)" [disabled]='!sid || txn' class="ml-2 mt-3" mat-raised-button color="warn" routerLink="/new">
+            <mat-icon class="mr-2">directions_run</mat-icon>Start txn
+        </button>
+
+        <button (click)="getTxnStatus(sid)" [disabled]='!sid' class="ml-2 mt-3" mat-raised-button routerLink="/new">
+            <mat-icon class="mr-2">info</mat-icon>Get txn status
+        </button>
+
+        <button (click)="createPalette(sid, txn)" [disabled]='!sid || !txn || startCreatingPalette || paletteCreated' class="ml-2 mt-3" mat-raised-button routerLink="/new">
+            <mat-icon class="mr-2">color_lens</mat-icon>Create Palette
+        </button>
+
+        <button (click)="createColors(sid, txn, pid)" [disabled]='!sid || !txn || !pid || startCreatingColors || colorsCreated' class="ml-2 mt-3" mat-raised-button routerLink="/new">
+            <mat-icon class="mr-2">device_hub</mat-icon>Create Linked Colors
+        </button>
+
+        <button (click)="commitTxn(sid, txn)" [disabled]='!sid || !txn || !colorsCreated !! || !paletteCreated' class="ml-2 mt-3" mat-raised-button color="warn" routerLink="/new">
+            <mat-icon class="mr-2">done</mat-icon>Commit txn
+        </button>
+
+        <button (click)="abortTxn(sid, txn)" [disabled]='!sid || !txn' class="ml-2 mt-3" mat-raised-button color="warn" routerLink="/new">
+            <mat-icon class="mr-2">cancel</mat-icon>Abort txt
+        </button>
+    </div>
 </div>
 
 <div class="terminal">
@@ -21,8 +46,11 @@
     </pre>
 </div>
 
-<div *ngIf="created">
-    <button class="mt-3" mat-raised-button color="warn" routerLink="/palettes">
+<div>
+    <button class="mt-3" mat-raised-button color="warn" (click)="cleartTreminal()">
+        <mat-icon class="mr-2">delete</mat-icon>Clear terminal
+    </button>
+    <button class="ml-2 mt-3" mat-raised-button color="warn" routerLink="/palettes">
         <mat-icon class="mr-2">arrow_back_ios</mat-icon>Back
     </button>
 </div>

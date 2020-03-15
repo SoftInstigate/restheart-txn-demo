@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, pipe } from 'rxjs';
 import { delay, map, mergeMap, catchError } from 'rxjs/operators';
 import { Color, Palette, ObjectId } from 'src/app/model';
 
@@ -12,6 +12,17 @@ export class NewPaletteComponent implements OnInit {
   log = '';
   created = false;
   errored = false;
+
+  sid: string = null;
+  txn: string = null;
+  pid: ObjectId = null;
+  startCreatingPalette = false;
+  paletteCreated = false;
+  startCreatingColors = false;
+  colorsCreated = false;
+
+  docsCreated = false;
+
   constructor() { }
 
   ngOnInit(): void {
@@ -21,81 +32,234 @@ export class NewPaletteComponent implements OnInit {
     this.log += msg += '\n';
   }
 
-  run() {
-    const palette: Palette = new Palette(null, 'new palette');
-
-    const color1 = new Color(new ObjectId('1'), 'green', '#66bb6a');
-    const color2 = new Color(new ObjectId('2'), 'blu', '#2196f3');
-    const color3 = new Color(new ObjectId('3'), 'lime', '#d4e157');
-    const color4 = new Color(new ObjectId('4'), 'red', '#b71c1c');
-    const color5 = new Color(new ObjectId('5'), 'pink', '#2196f3');
-
-    of('> POST /_sessions').pipe(
-      map(str => { this.appendLog(`${str}`); return null; }),
-      mergeMap(() => this.createSession()),
-      map(sid => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /_sessions/${sid}\n`); return sid; }),
-      map(sid => { this.appendLog(`> POST /_sessions/${sid}/_txns`); return sid; }),
-      mergeMap(sid => this.startTxn(sid).pipe(
-        map(txn => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /_sessions/${sid}/_txns/${txn}\n`); return txn; }),
-
-        map(txn => { this.appendLog(`------------------ TRANSACTION STARTED ------------------\n`); return txn; }),
-
-        map(txn => { this.appendLog(`> POST /palettes?sid=${sid}&txn=${txn}`); return txn; }),
-        mergeMap(txn => this.writePalette(sid, txn, palette).pipe(
-          map(pid => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /palettes/${pid.$oid}\n`); return pid; }),
-
-          map(pid => { this.appendLog(`> POST /colors?sid=${sid}&txn=${txn}`); return pid; }),
-          mergeMap(pid => this.writeColor(sid, txn, pid, color1)),
-          map(cid => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /colors/${cid.$oid}\n`); return cid; }),
-
-          map(cid => { this.appendLog(`> POST /colors?sid=${sid}&txn=${txn}`); return cid; }),
-          mergeMap(pid => this.writeColor(sid, txn, pid, color2)),
-          map(cid => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /colors/${cid.$oid}\n`); return cid; }),
-
-
-          map(pid => { this.appendLog(`> POST /colors?sid=${sid}&txn=${txn}`); return pid; }),
-          mergeMap(pid => this.writeColor(sid, txn, pid, color3)),
-          map(cid => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /colors/${cid.$oid}\n`); return cid; }),
-
-          map(pid => { this.appendLog(`> POST /colors?sid=${sid}&txn=${txn}`); return pid; }),
-          mergeMap(pid => this.writeColor(sid, txn, pid, color4)),
-          map(cid => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /colors/${cid.$oid}\n`); return cid; }),
-
-          map(pid => { this.appendLog(`> POST /colors?sid=${sid}&txn=${txn}`); return pid; }),
-          mergeMap(pid => this.writeColor(sid, txn, pid, color5)),
-          map(cid => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /colors/${cid.$oid}\n`); return cid; }),
-
-          map(cid => { this.appendLog(`> PATCH /_sessions/${sid}/_txns/${txn}`); return sid; }),
-          mergeMap(() => this.commitTxn(sid, txn)),
-          map(cid => { this.appendLog(`HTTP/1.1 200 OK\n`); return cid; }),
-          
-          map(pid => { this.appendLog(`------------------ TRANSACTION COMMITTED -----------------`); return pid; }))
-        ))
-      ))
-      .subscribe(() => this.created = true);
+  cleartTreminal() {
+    this.log = '';
   }
 
   /**
    * @returns the id of the created session
    */
-  private createSession(): Observable<string> {
-    return of('12313-dffs-44543-432sdf').pipe(delay(500));
+  createSession(): void {
+    console.log(`createSession()`);
+
+    of('> POST /_sessions')
+      .pipe(
+        map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
+
+        // Here execute the POST
+        mergeMap(() => of('12313-dffs-44543-432sdf')
+
+          .pipe(
+            delay(500),
+            map(sid => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /_sessions/${sid}\n`); return sid; }))
+        )
+      )
+      .subscribe(sid => this.sid = sid);
   }
 
   /**
    * @param sid the session id
    * @returns the id of the started txn
    */
-  private startTxn(sid: string): Observable<string> {
-    return of('1').pipe(delay(1000));
+  startTxn(sid: string): void {
+    console.log(`startTxn(${sid})`);
+
+    if (!sid) {
+      return;
+    }
+
+    of(`> POST /_sessions/${sid}/_txns`)
+      .pipe(
+        map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
+
+        // Here execute the POST
+        mergeMap(() => of('1')
+
+          .pipe(
+            delay(500),
+            map(txn => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /_sessions/${sid}/_txns/${txn}\n`); return txn; }))
+        )
+      )
+      .subscribe(txn => this.txn = txn);
   }
 
   /**
    * @param sid the session id
+   * param txn the txn number
    * @returns true
    */
-  private commitTxn(sid: string, txn: string): Observable<boolean> {
-    return of(true).pipe(delay(1000));
+  getTxnStatus(sid: string): void {
+    console.log(`getTxnStatus(${sid})`);
+
+    if (!sid) {
+      return;
+    }
+
+    of(`> GET /_sessions/${sid}/_txns`)
+      .pipe(
+        map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
+
+        // Here execute the POST
+        mergeMap(() => of(true)
+
+          .pipe(
+            delay(500),
+            map(res => {
+              this.appendLog(`HTTP/1.1 200 OK\n
+{
+  "currentTxn": {
+  "id": 1,
+  "status": "IN"
+  }
+}\n`);
+
+              return res;
+            }))
+        )
+      )
+      .subscribe();
+  }
+
+  /**
+   * @param sid the session id
+   * @param txn the txn number
+   * @returns true
+   */
+  createPalette(sid: string, txn: string): void {
+    console.log(`createPalette(${sid}, ${txn})`);
+
+    if (!sid || !txn) {
+      return;
+    }
+
+    this.startCreatingPalette = true;
+
+    of(`> POST /palettes/?sid=${sid}&txn=${txn}\n`)
+      .pipe(
+        map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
+
+        // Here execute the POST
+        mergeMap(() => of(new ObjectId('sdfsdfsd-sfdds-fddffd-dfsdffd'))
+
+          .pipe(
+            delay(500),
+            map(res => { this.appendLog(`HTTP/1.1 201 Created\n`); return res; }))
+        )
+      )
+      .subscribe(p => {
+        this.pid = p;
+        this.paletteCreated = true;
+      });
+  }
+
+  /**
+   * @param sid the session id
+   * @param txn the txn number
+   * @returns true
+   */
+  createColors(sid: string, txn: string, pid: ObjectId): void {
+    this.startCreatingColors = true;
+
+    this.createColor(sid, txn, pid).pipe(
+      mergeMap(() => this.createColor(sid, txn, pid)),
+      mergeMap(() => this.createColor(sid, txn, pid)),
+      mergeMap(() => this.createColor(sid, txn, pid)),
+      mergeMap(() => this.createColor(sid, txn, pid))
+    ).subscribe(() => this.colorsCreated = true);
+  }
+
+  /**
+   * @param sid the session id
+   * @param txn the txn number
+   * @returns true
+   */
+  private createColor(sid: string, txn: string, pid: ObjectId): Observable<ObjectId> {
+    console.log(`createColors(${sid}, ${txn}, ${pid})`);
+
+    if (!sid || !txn || !pid) {
+      return;
+    }
+
+    return of(`> POST /colors/?sid=${sid}&txn=${txn}\n`)
+      .pipe(
+        map(str => { console.log('msg', str); this.appendLog(`${str}`); return str; }),
+
+        // Here execute the POST
+        mergeMap(() => of(new ObjectId('sdfsdfsd-sfdds-fddffd-dfsdffd'))
+
+          .pipe(
+            delay(500),
+            map(res => { this.appendLog(`HTTP/1.1 201 Created\n`); return res; }))
+        )
+      );
+  }
+
+  /**
+   * @param sid the session id
+   * @param txn the txn number
+   * @returns true
+   */
+  commitTxn(sid: string, txn: string): void {
+    console.log(`commitTxn(${sid}, ${txn})`);
+
+    this.txn = null;
+    this.pid = null;
+    this.startCreatingColors = false;
+    this.startCreatingPalette = false;
+    this.paletteCreated = false;
+    this.colorsCreated = false;
+
+    if (!sid || !txn) {
+      return;
+    }
+
+    of(`> PATCH /_sessions/${sid}/_txns/${txn}`)
+      .pipe(
+        map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
+
+        // Here execute the POST
+        mergeMap(() => of(true)
+
+          .pipe(
+            delay(500),
+            map(res => { this.appendLog(`HTTP/1.1 200 OK\n`); this.txn = null; return res; }))
+        )
+      )
+      .subscribe();
+  }
+
+  /**
+   * @param sid the session id
+   * @param txn the txn number
+   * @returns true
+   */
+  abortTxn(sid: string, txn: string): void {
+    console.log(`abortTxn(${sid}, ${txn})`);
+
+    this.txn = null;
+    this.pid = null;
+    this.startCreatingColors = false;
+    this.startCreatingPalette = false;
+    this.paletteCreated = false;
+    this.colorsCreated = false;
+
+    if (!sid || !txn) {
+      return;
+    }
+
+    of(`> DELETE /_sessions/${sid}/_txns/${txn}`)
+      .pipe(
+        map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
+
+        // Here execute the POST
+        mergeMap(() => of(true)
+
+          .pipe(
+            delay(500),
+            map(res => { this.appendLog(`HTTP/1.1 204 No Content\n`); this.txn = null; return res; }))
+        )
+      )
+      .subscribe();
   }
 
   /**
