@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, of, pipe } from 'rxjs';
-import { delay, map, mergeMap, catchError } from 'rxjs/operators';
+import { Observable, of, interval, Subscription } from 'rxjs';
+import { delay, map, mergeMap } from 'rxjs/operators';
 import { Color, Palette, ObjectId } from 'src/app/model';
 
 @Component({
@@ -22,6 +22,9 @@ export class NewPaletteComponent implements OnInit {
   colorsCreated = false;
 
   docsCreated = false;
+
+  txnAge = 0;
+  timer: Subscription;
 
   constructor() { }
 
@@ -64,6 +67,10 @@ export class NewPaletteComponent implements OnInit {
   startTxn(sid: string): void {
     console.log(`startTxn(${sid})`);
 
+    this.timer = interval(1000)
+      .pipe(map(x => this.txnAge = x))
+      .subscribe();
+
     if (!sid) {
       return;
     }
@@ -85,8 +92,6 @@ export class NewPaletteComponent implements OnInit {
 
   /**
    * @param sid the session id
-   * param txn the txn number
-   * @returns true
    */
   getTxnStatus(sid: string): void {
     console.log(`getTxnStatus(${sid})`);
@@ -115,6 +120,58 @@ export class NewPaletteComponent implements OnInit {
 
               return res;
             }))
+        )
+      )
+      .subscribe();
+  }
+
+  /**
+   * @param sid the session id
+   * @param txn the txn number
+   */
+  getData(sid: string, txn?: string): void {
+    console.log(`getTxnStatus(${sid})`);
+
+    if (!sid) {
+      return;
+    }
+
+    const req = txn ? `> GET /palettes/_aggrs/awc?sid=${sid}&txn=${txn}`
+    : `> GET /palettes/_aggrs/awc?sid=${sid}`;
+
+    const resp = txn ? `HTTP/1.1 200 OK
+[
+  {
+    "_id" : { "$oid": "egrhko-wfefj-addasjo" },
+    "name": "new palette",
+    "colors" : [
+      { "_id":  { "$oid": "egrhko-wfefj-addasjo" },
+        "hex": "#2af342" },
+        { "_id":  { "$oid": "egrhko-wfefj-addasjo" },
+        "hex": "#2af342" },
+        { "_id":  { "$oid": "egrhko-wfefj-addasjo" },
+        "hex": "#2af342" },
+        { "_id":  { "$oid": "egrhko-wfefj-addasjo" },
+        "hex": "#2af342" },
+        { "_id":  { "$oid": "egrhko-wfefj-addasjo" },
+        "hex": "#2af342" },
+    ]
+  }
+]\n` : '[]\n';
+
+
+    of(req)
+      .pipe(
+        map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
+
+        // Here execute the POST
+        mergeMap(() => of(true).pipe(
+          delay(500),
+          map(res => {
+            this.appendLog(resp);
+
+            return res;
+          }))
         )
       )
       .subscribe();
@@ -202,12 +259,7 @@ export class NewPaletteComponent implements OnInit {
   commitTxn(sid: string, txn: string): void {
     console.log(`commitTxn(${sid}, ${txn})`);
 
-    this.txn = null;
-    this.pid = null;
-    this.startCreatingColors = false;
-    this.startCreatingPalette = false;
-    this.paletteCreated = false;
-    this.colorsCreated = false;
+    this.resetStatus();
 
     if (!sid || !txn) {
       return;
@@ -236,12 +288,7 @@ export class NewPaletteComponent implements OnInit {
   abortTxn(sid: string, txn: string): void {
     console.log(`abortTxn(${sid}, ${txn})`);
 
-    this.txn = null;
-    this.pid = null;
-    this.startCreatingColors = false;
-    this.startCreatingPalette = false;
-    this.paletteCreated = false;
-    this.colorsCreated = false;
+    this.resetStatus();
 
     if (!sid || !txn) {
       return;
@@ -282,5 +329,16 @@ export class NewPaletteComponent implements OnInit {
    */
   private writePalette(sid: string, txn: string, palette: Palette): Observable<ObjectId> {
     return of(new ObjectId('12345')).pipe(delay(1000));
+  }
+
+  private resetStatus() {
+    this.txn = null;
+    this.pid = null;
+    this.startCreatingColors = false;
+    this.startCreatingPalette = false;
+    this.paletteCreated = false;
+    this.colorsCreated = false;
+    this.timer.unsubscribe();
+    this.txnAge = 0;
   }
 }

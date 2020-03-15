@@ -40,5 +40,13 @@
 }
 
 pre {
-    font-size: 18px;
+    font-size: 22px;
+    line-height: 24px;
+}
+
+.jumbotron {
+    min-width: 800px;
+    font-weight: 100;
+    font-size: 140%;
+    line-height: 120%;
 }
