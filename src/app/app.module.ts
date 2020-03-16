@@ -5,6 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { HeaderComponent } from './header/header.component';
 import { PalettesComponent } from './palettes/palettes.component';
 import { PaletteComponent } from './palette/palette.component';
@@ -12,6 +13,7 @@ import { NewPaletteComponent } from './new-palette/new-palette.component';
 import { PaletteCreationLogComponent } from './palette-creation-log/palette-creation-log.component';
 import { HomeComponent } from './home/home.component';
 import { FooterComponent } from './footer/footer.component';
+import { AuthInterceptor } from './auth.interceptor';
 
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
@@ -41,7 +43,13 @@ import { AboutComponent } from './about/about.component';
     MatButtonModule,
     MatIconModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

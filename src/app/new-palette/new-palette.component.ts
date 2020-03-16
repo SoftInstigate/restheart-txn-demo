@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable, of, interval, Subscription } from 'rxjs';
 import { delay, map, mergeMap } from 'rxjs/operators';
 import { Color, Palette, ObjectId } from 'src/app/model';
+import { PalettesService } from 'src/app/palettes.service';
 
 @Component({
   selector: 'app-new-palette',
@@ -26,7 +27,7 @@ export class NewPaletteComponent implements OnInit {
   txnAge = 0;
   timer: Subscription;
 
-  constructor() { }
+  constructor(private palettesService: PalettesService) { }
 
   ngOnInit(): void {
   }
@@ -165,7 +166,7 @@ export class NewPaletteComponent implements OnInit {
         map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
 
         // Here execute the POST
-        mergeMap(() => of(true).pipe(
+        mergeMap(() => this.palettesService.get(`http://127.0.0.1:8080?sid=${sid}`).pipe(
           delay(500),
           map(res => {
             this.appendLog(resp);
