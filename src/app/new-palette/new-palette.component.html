@@ -59,7 +59,11 @@
         </button>
 
         <button class="mt-3" mat-raised-button class="ml-2 mt-3" (click)="cleartTreminal()">
-            <mat-icon class="mr-2">delete</mat-icon>Clear terminal
+            <mat-icon class="mr-2">remove_from_queue</mat-icon>Clear terminal
+        </button>
+
+        <button class="mt-3" [disabled]='txn' mat-raised-button class="ml-2 mt-3" (click)="deleteAllData()" color="warn">
+            <mat-icon class="mr-2">delete</mat-icon>Delete all data
         </button>
 
         <button class="ml-2 mt-3" mat-raised-button routerLink="/palettes" class="ml-2 mt-3">

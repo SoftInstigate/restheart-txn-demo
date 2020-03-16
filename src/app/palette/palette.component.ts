@@ -10,13 +10,11 @@ import { Palette, Color } from 'src/app/model';
 })
 export class PaletteComponent implements OnInit {
   @Input() palette: Palette;
+  colors: Observable<Color[]>;
 
   constructor(private palettesService: PalettesService) { }
 
   ngOnInit(): void {
-  }
-
-  colors(): Observable<Color[]> {
-    return this.palettesService.loadColors(this.palette.id());
+    this.colors = this.palettesService.loadColors(this.palette._id);
   }
 }

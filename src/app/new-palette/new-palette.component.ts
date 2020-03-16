@@ -50,11 +50,14 @@ export class NewPaletteComponent implements OnInit {
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
 
-        // Here execute the POST
-        mergeMap(() => of('12313-dffs-44543-432sdf')
-
+        // Here execute the request
+        mergeMap(() => this.palettesService.post('/_sessions', null)
           .pipe(
-            delay(500),
+            map(resp => {
+              const loc = resp.headers.get('Location');
+              return loc.substring(loc.lastIndexOf('/') + 1);
+            }),
+            //delay(500),
             map(sid => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /_sessions/${sid}\n`); return sid; }))
         )
       )
@@ -80,11 +83,15 @@ export class NewPaletteComponent implements OnInit {
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
 
-        // Here execute the POST
-        mergeMap(() => of('1')
+        // Here execute the request
+        mergeMap(() => this.palettesService.post(`/_sessions/${sid}/_txns`, null)
 
           .pipe(
-            delay(500),
+            map(resp => {
+              const loc = resp.headers.get('Location');
+              return loc.substring(loc.lastIndexOf('/') + 1);
+            }),
+            //delay(500),
             map(txn => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /_sessions/${sid}/_txns/${txn}\n`); return txn; }))
         )
       )
@@ -105,19 +112,13 @@ export class NewPaletteComponent implements OnInit {
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
 
-        // Here execute the POST
-        mergeMap(() => of(true)
+        // Here execute the request
+        mergeMap(() => this.palettesService.get(`/_sessions/${sid}/_txns`)
 
           .pipe(
-            delay(500),
+            //delay(500),
             map(res => {
-              this.appendLog(`HTTP/1.1 200 OK\n
-{
-  "currentTxn": {
-  "id": 1,
-  "status": "IN"
-  }
-}\n`);
+              this.appendLog('HTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2)));
 
               return res;
             }))
@@ -137,39 +138,30 @@ export class NewPaletteComponent implements OnInit {
       return;
     }
 
-    const req = txn ? `> GET /palettes/_aggrs/awc?sid=${sid}&txn=${txn}`
-    : `> GET /palettes/_aggrs/awc?sid=${sid}`;
+    const uriP = txn ? `/palettes?sid=${sid}&txn=${txn}` : `/palettes?sid=${sid}`;
+    const uriC = txn ? `/colors?sid=${sid}&txn=${txn}` : `/colors?sid=${sid}`;
 
-    const resp = txn ? `HTTP/1.1 200 OK
-[
-  {
-    "_id" : { "$oid": "egrhko-wfefj-addasjo" },
-    "name": "new palette",
-    "colors" : [
-      { "_id":  { "$oid": "egrhko-wfefj-addasjo" },
-        "hex": "#2af342" },
-        { "_id":  { "$oid": "egrhko-wfefj-addasjo" },
-        "hex": "#2af342" },
-        { "_id":  { "$oid": "egrhko-wfefj-addasjo" },
-        "hex": "#2af342" },
-        { "_id":  { "$oid": "egrhko-wfefj-addasjo" },
-        "hex": "#2af342" },
-        { "_id":  { "$oid": "egrhko-wfefj-addasjo" },
-        "hex": "#2af342" },
-    ]
-  }
-]\n` : '[]\n';
+    const reqP = `> GET ${uriP}`;
+    const reqC = `> GET ${uriC}`;
 
-
-    of(req)
+    of(reqP)
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
 
-        // Here execute the POST
-        mergeMap(() => this.palettesService.get(`http://127.0.0.1:8080?sid=${sid}`).pipe(
-          delay(500),
+        // Here execute the request
+        mergeMap(() => this.palettesService.get(uriP).pipe(
+          //delay(500),
           map(res => {
-            this.appendLog(resp);
+            this.appendLog('HTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2)));
+
+            return res;
+          }))
+        ),
+        map(() => { console.log('msg', reqC); this.appendLog(`\n${reqC}`); return null; }),
+        mergeMap(() => this.palettesService.get(uriC).pipe(
+          //delay(500),
+          map(res => {
+            this.appendLog('HTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2)));
 
             return res;
           }))
@@ -192,20 +184,25 @@ export class NewPaletteComponent implements OnInit {
 
     this.startCreatingPalette = true;
 
-    of(`> POST /palettes/?sid=${sid}&txn=${txn}\n`)
+    const palette = { name: 'Transacted Palette!' };
+
+    of(`> POST /palettes/?sid=${sid}&txn=${txn}\n` + JSON.stringify(palette, null, 2))
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
 
-        // Here execute the POST
-        mergeMap(() => of(new ObjectId('sdfsdfsd-sfdds-fddffd-dfsdffd'))
-
+        // Here execute the request
+        mergeMap(() => this.palettesService.post(`/palettes/?sid=${sid}&txn=${txn}`, palette)
           .pipe(
-            delay(500),
-            map(res => { this.appendLog(`HTTP/1.1 201 Created\n`); return res; }))
+            //delay(500),
+            map(resp => {
+              const loc = resp.headers.get('Location');
+              return loc.substring(loc.lastIndexOf('/') + 1);
+            }),
+            map(id => { this.appendLog(`\nHTTP/1.1 201 Created\nLocation: /palettes/${id}\n`); return id; }))
         )
       )
       .subscribe(p => {
-        this.pid = p;
+        this.pid = { $oid: p };
         this.paletteCreated = true;
       });
   }
@@ -218,12 +215,42 @@ export class NewPaletteComponent implements OnInit {
   createColors(sid: string, txn: string, pid: ObjectId): void {
     this.startCreatingColors = true;
 
-    this.createColor(sid, txn, pid).pipe(
-      mergeMap(() => this.createColor(sid, txn, pid)),
-      mergeMap(() => this.createColor(sid, txn, pid)),
-      mergeMap(() => this.createColor(sid, txn, pid)),
-      mergeMap(() => this.createColor(sid, txn, pid))
-    ).subscribe(() => this.colorsCreated = true);
+    const colors = this.shuffle([
+      { name: 'green', hex: '#66bb6a' },
+      { name: 'pink',  hex: '#2196f3' },
+      { name: 'blu',   hex: '#2196f3' },
+      { name: 'lime',  hex: '#d4e157' },
+      { name: 'red',   hex: '#b71c1c' }
+    ]);
+
+    this.createColor(sid, txn, pid, colors[0].name, colors[0].hex)
+      .pipe(
+        mergeMap(() => this.createColor(sid, txn, pid, colors[1].name, colors[1].hex)),
+        mergeMap(() => this.createColor(sid, txn, pid, colors[2].name, colors[2].hex)),
+        mergeMap(() => this.createColor(sid, txn, pid, colors[3].name, colors[3].hex)),
+        mergeMap(() => this.createColor(sid, txn, pid, colors[4].name, colors[4].hex))
+      ).subscribe(() => this.colorsCreated = true);
+  }
+
+  private shuffle(array: any[]): any[] {
+    let currentIndex = array.length;
+    let temporaryValue: number;
+    let randomIndex: number;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+
+    return array;
   }
 
   /**
@@ -231,23 +258,29 @@ export class NewPaletteComponent implements OnInit {
    * @param txn the txn number
    * @returns true
    */
-  private createColor(sid: string, txn: string, pid: ObjectId): Observable<ObjectId> {
+  private createColor(sid: string, txn: string, pid: ObjectId, name: string, hex: string): Observable<ObjectId> {
     console.log(`createColors(${sid}, ${txn}, ${pid})`);
 
     if (!sid || !txn || !pid) {
       return;
     }
 
-    return of(`> POST /colors/?sid=${sid}&txn=${txn}\n`)
+    const color = { name: `${name}`, hex: `${hex}`, palette: { $oid: pid.$oid } };
+
+    return of(`> POST /colors/?sid=${sid}&txn=${txn}\n` + JSON.stringify(color, null, 2))
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`); return str; }),
 
-        // Here execute the POST
-        mergeMap(() => of(new ObjectId('sdfsdfsd-sfdds-fddffd-dfsdffd'))
+        // Here execute the request
+        mergeMap(() => this.palettesService.post(`/colors/?sid=${sid}&txn=${txn}`, color)
 
           .pipe(
-            delay(500),
-            map(res => { this.appendLog(`HTTP/1.1 201 Created\n`); return res; }))
+            //delay(500),
+            map(resp => {
+              const loc = resp.headers.get('Location');
+              return loc.substring(loc.lastIndexOf('/') + 1);
+            }),
+            map(id => { this.appendLog(`\nHTTP/1.1 201 Created\nLocation: /palettes/${id}\n`); return { $oid: id }; }))
         )
       );
   }
@@ -270,11 +303,11 @@ export class NewPaletteComponent implements OnInit {
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
 
-        // Here execute the POST
-        mergeMap(() => of(true)
+        // Here execute the request
+        mergeMap(() => this.palettesService.patch(`/_sessions/${sid}/_txns/${txn}`, null)
 
           .pipe(
-            delay(500),
+            //delay(500),
             map(res => { this.appendLog(`HTTP/1.1 200 OK\n`); this.txn = null; return res; }))
         )
       )
@@ -299,11 +332,11 @@ export class NewPaletteComponent implements OnInit {
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
 
-        // Here execute the POST
-        mergeMap(() => of(true)
+        // Here execute the request
+        mergeMap(() => this.palettesService.delete(`/_sessions/${sid}/_txns/${txn}`)
 
           .pipe(
-            delay(500),
+            //delay(500),
             map(res => { this.appendLog(`HTTP/1.1 204 No Content\n`); this.txn = null; return res; }))
         )
       )
@@ -311,25 +344,44 @@ export class NewPaletteComponent implements OnInit {
   }
 
   /**
-   * @param sid the session id
-   * @param txn the txn id
-   * @param pid the palette id
-   * @param color the color to create
-   * @returns the id of the created color
+   * @returns true
    */
-  private writeColor(sid: string, txn: string, pid: ObjectId, color: Color): Observable<ObjectId> {
-    const n = Math.floor(Math.random() * 1000);
-    return of(new ObjectId(`${n}`)).pipe(delay(1000));
-  }
+  deleteAllData(): void {
+    console.log(`deleteAll()`);
 
-  /**
-   * @param sid the session id
-   * @param txn the txn id
-   * @param color the color to create
-   * @returns the id of the created palette
-   */
-  private writePalette(sid: string, txn: string, palette: Palette): Observable<ObjectId> {
-    return of(new ObjectId('12345')).pipe(delay(1000));
+    of('> DELETE /palettes/*?filter={"$oid":{"$exists":true}}')
+      .pipe(
+        map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
+
+        // Here execute the request
+        mergeMap(() => this.palettesService.delete('/palettes/*?filter={"_id":{"$exists":true}}')
+
+          .pipe(
+            //delay(500),
+            map(res => {
+              this.appendLog('\nHTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2)));
+
+              return res;
+            }))
+        ),
+
+        map(res => '\n> DELETE /colors/*?filter={"$oid":{"$exists":true}}'),
+
+        map(str => { console.log('msg', str); this.appendLog(`${str}`); return null; }),
+
+        // Here execute the request
+        mergeMap(() => this.palettesService.delete(`/colors/*?filter={"_id":{"$exists":true}}`)
+
+          .pipe(
+            //delay(500),
+            map(res => {
+              this.appendLog('\nHTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2)));
+
+              return res;
+            }))
+        )
+      )
+      .subscribe();
   }
 
   private resetStatus() {
