@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { ObjectId, Palette, Color } from 'src/app/model';
 import { Observable, of } from 'rxjs';
 
@@ -7,7 +8,7 @@ import { Observable, of } from 'rxjs';
 })
 export class PalettesService {
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   loadPalettes(): Observable<Palette[]> {
     const palettes: Palette[] = [
@@ -32,6 +33,14 @@ export class PalettesService {
     ];
 
     return of(this.shuffle(colors));
+  }
+
+  get(url: string): Observable<any> {
+    return this.http.get(url);
+  }
+
+  post(url: string, data: any): Observable<HttpResponse<any>> {
+    return this.http.post(url, data, { observe: 'response' });
   }
 
   private shuffle(array: Color[]): Color[] {
