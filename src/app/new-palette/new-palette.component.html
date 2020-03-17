@@ -51,10 +51,10 @@
     <div class="text-center">
         <button (click)="getData(sid, txn)" [disabled]='!sid || !txn' class="ml-2 mt-3" mat-raised-button
             routerLink="/new">
-            <mat-icon class="mr-2">done</mat-icon>Get data
+            <mat-icon class="mr-2">done</mat-icon>Get data in txn
         </button>
 
-        <button (click)="getData(sid)" [disabled]='!sid' class="ml-2 mt-3" mat-raised-button routerLink="/new">
+        <button (click)="getData(sid)" class="ml-2 mt-3" mat-raised-button routerLink="/new">
             <mat-icon class="mr-2">done</mat-icon>Get data outside txn
         </button>
 
@@ -62,8 +62,8 @@
             <mat-icon class="mr-2">remove_from_queue</mat-icon>Clear terminal
         </button>
 
-        <button class="mt-3" [disabled]='txn' mat-raised-button class="ml-2 mt-3" (click)="deleteAllData()" color="warn">
-            <mat-icon class="mr-2">delete</mat-icon>Delete all data
+        <button class="mt-3" mat-raised-button class="ml-2 mt-3" (click)="deleteAllData()" color="warn">
+            <mat-icon class="mr-2">delete</mat-icon>Delete all data outside txn
         </button>
 
         <button class="ml-2 mt-3" mat-raised-button routerLink="/palettes" class="ml-2 mt-3">

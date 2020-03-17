@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, of, interval, Subscription } from 'rxjs';
-import { delay, map, mergeMap } from 'rxjs/operators';
+import { Observable, of, interval, timer, Subscription } from 'rxjs';
+import { delay, map, mergeMap, catchError } from 'rxjs/operators';
 import { Color, Palette, ObjectId } from 'src/app/model';
 import { PalettesService } from 'src/app/palettes.service';
 
@@ -57,9 +57,10 @@ export class NewPaletteComponent implements OnInit {
               const loc = resp.headers.get('Location');
               return loc.substring(loc.lastIndexOf('/') + 1);
             }),
-            //delay(500),
-            map(sid => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /_sessions/${sid}\n`); return sid; }))
-        )
+            // delay(500),
+            map(sid => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /_sessions/${sid}\n`); return sid; }),
+            catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; })
+          ))
       )
       .subscribe(sid => this.sid = sid);
   }
@@ -71,7 +72,7 @@ export class NewPaletteComponent implements OnInit {
   startTxn(sid: string): void {
     console.log(`startTxn(${sid})`);
 
-    this.timer = interval(1000)
+    this.timer = timer(1000, 1000)
       .pipe(map(x => this.txnAge = x))
       .subscribe();
 
@@ -91,9 +92,10 @@ export class NewPaletteComponent implements OnInit {
               const loc = resp.headers.get('Location');
               return loc.substring(loc.lastIndexOf('/') + 1);
             }),
-            //delay(500),
-            map(txn => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /_sessions/${sid}/_txns/${txn}\n`); return txn; }))
-        )
+            // delay(500),
+            map(txn => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /_sessions/${sid}/_txns/${txn}\n`); return txn; }),
+            catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; })
+          ))
       )
       .subscribe(txn => this.txn = txn);
   }
@@ -116,13 +118,14 @@ export class NewPaletteComponent implements OnInit {
         mergeMap(() => this.palettesService.get(`/_sessions/${sid}/_txns`)
 
           .pipe(
-            //delay(500),
+            // delay(500),
             map(res => {
               this.appendLog('HTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2)));
 
               return res;
-            }))
-        )
+            }),
+            catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; })
+          ))
       )
       .subscribe();
   }
@@ -131,15 +134,12 @@ export class NewPaletteComponent implements OnInit {
    * @param sid the session id
    * @param txn the txn number
    */
-  getData(sid: string, txn?: string): void {
+  getData(sid?: string, txn?: string): void {
     console.log(`getTxnStatus(${sid})`);
 
-    if (!sid) {
-      return;
-    }
 
-    const uriP = txn ? `/palettes?sid=${sid}&txn=${txn}` : `/palettes?sid=${sid}`;
-    const uriC = txn ? `/colors?sid=${sid}&txn=${txn}` : `/colors?sid=${sid}`;
+    const uriP = sid && txn ? `/palettes?sid=${sid}&txn=${txn}` : `/palettes`;
+    const uriC = sid && txn ? `/colors?sid=${sid}&txn=${txn}` : `/colors`;
 
     const reqP = `> GET ${uriP}`;
     const reqC = `> GET ${uriC}`;
@@ -150,7 +150,7 @@ export class NewPaletteComponent implements OnInit {
 
         // Here execute the request
         mergeMap(() => this.palettesService.get(uriP).pipe(
-          //delay(500),
+          // delay(500),
           map(res => {
             this.appendLog('HTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2)));
 
@@ -159,13 +159,14 @@ export class NewPaletteComponent implements OnInit {
         ),
         map(() => { console.log('msg', reqC); this.appendLog(`\n${reqC}`); return null; }),
         mergeMap(() => this.palettesService.get(uriC).pipe(
-          //delay(500),
+          // delay(500),
           map(res => {
             this.appendLog('HTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2)));
 
             return res;
-          }))
-        )
+          }),
+          catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; })
+        ))
       )
       .subscribe();
   }
@@ -184,7 +185,7 @@ export class NewPaletteComponent implements OnInit {
 
     this.startCreatingPalette = true;
 
-    const palette = { name: 'Transacted Palette!' };
+    const palette = { name: `Transacted Palette ${txn}!` };
 
     of(`> POST /palettes/?sid=${sid}&txn=${txn}\n` + JSON.stringify(palette, null, 2))
       .pipe(
@@ -193,13 +194,14 @@ export class NewPaletteComponent implements OnInit {
         // Here execute the request
         mergeMap(() => this.palettesService.post(`/palettes/?sid=${sid}&txn=${txn}`, palette)
           .pipe(
-            //delay(500),
+            // delay(500),
             map(resp => {
               const loc = resp.headers.get('Location');
               return loc.substring(loc.lastIndexOf('/') + 1);
             }),
-            map(id => { this.appendLog(`\nHTTP/1.1 201 Created\nLocation: /palettes/${id}\n`); return id; }))
-        )
+            map(id => { this.appendLog(`\nHTTP/1.1 201 Created\nLocation: /palettes/${id}\n`); return id; }),
+            catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; })
+          ))
       )
       .subscribe(p => {
         this.pid = { $oid: p };
@@ -217,10 +219,10 @@ export class NewPaletteComponent implements OnInit {
 
     const colors = this.shuffle([
       { name: 'green', hex: '#66bb6a' },
-      { name: 'pink',  hex: '#2196f3' },
-      { name: 'blu',   hex: '#2196f3' },
-      { name: 'lime',  hex: '#d4e157' },
-      { name: 'red',   hex: '#b71c1c' }
+      { name: 'pink', hex: '#2196f3' },
+      { name: 'blu', hex: '#2196f3' },
+      { name: 'lime', hex: '#d4e157' },
+      { name: 'red', hex: '#b71c1c' }
     ]);
 
     this.createColor(sid, txn, pid, colors[0].name, colors[0].hex)
@@ -275,13 +277,14 @@ export class NewPaletteComponent implements OnInit {
         mergeMap(() => this.palettesService.post(`/colors/?sid=${sid}&txn=${txn}`, color)
 
           .pipe(
-            //delay(500),
+            // delay(500),
             map(resp => {
               const loc = resp.headers.get('Location');
               return loc.substring(loc.lastIndexOf('/') + 1);
             }),
-            map(id => { this.appendLog(`\nHTTP/1.1 201 Created\nLocation: /palettes/${id}\n`); return { $oid: id }; }))
-        )
+            map(id => { this.appendLog(`\nHTTP/1.1 201 Created\nLocation: /palettes/${id}\n`); return { $oid: id }; }),
+            catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; })
+          ))
       );
   }
 
@@ -307,9 +310,10 @@ export class NewPaletteComponent implements OnInit {
         mergeMap(() => this.palettesService.patch(`/_sessions/${sid}/_txns/${txn}`, null)
 
           .pipe(
-            //delay(500),
-            map(res => { this.appendLog(`HTTP/1.1 200 OK\n`); this.txn = null; return res; }))
-        )
+            // delay(500),
+            map(res => { this.appendLog(`HTTP/1.1 200 OK\n`); this.txn = null; return res; }),
+            catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; })
+          ))
       )
       .subscribe();
   }
@@ -336,9 +340,13 @@ export class NewPaletteComponent implements OnInit {
         mergeMap(() => this.palettesService.delete(`/_sessions/${sid}/_txns/${txn}`)
 
           .pipe(
-            //delay(500),
-            map(res => { this.appendLog(`HTTP/1.1 204 No Content\n`); this.txn = null; return res; }))
-        )
+            // delay(500),
+            map(res => { this.appendLog(`HTTP/1.1 204 No Content\n`); this.resetStatus(); return res; }),
+            catchError(res => {
+              console.log('************', res);
+              this.appendLog(`HTTP/1.1 400 Bad Request\n`);
+              this.txn = null; return [];
+            })))
       )
       .subscribe();
   }
@@ -357,12 +365,13 @@ export class NewPaletteComponent implements OnInit {
         mergeMap(() => this.palettesService.delete('/palettes/*?filter={"_id":{"$exists":true}}')
 
           .pipe(
-            //delay(500),
+            // delay(500),
             map(res => {
               this.appendLog('\nHTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2)));
 
               return res;
-            }))
+            }),
+            catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return res; }))
         ),
 
         map(res => '\n> DELETE /colors/*?filter={"$oid":{"$exists":true}}'),
@@ -373,12 +382,13 @@ export class NewPaletteComponent implements OnInit {
         mergeMap(() => this.palettesService.delete(`/colors/*?filter={"_id":{"$exists":true}}`)
 
           .pipe(
-            //delay(500),
+            // delay(500),
             map(res => {
               this.appendLog('\nHTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2)));
 
               return res;
-            }))
+            }),
+            catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; }))
         )
       )
       .subscribe();
