@@ -1,79 +1,101 @@
 <div class="content">
-    <div class="display-5 mb-5">Create Palette Process</div>
-
-    <div class="jumbotron p-2 mb-0">
-        <p class="text-center m-0"><strong>status</strong></p>
-        <ul class="pt-3">
-            <li>Session Id: {{sid}}</li>
-            <li>Txn number: {{txn}}</li>
-            <li>Txn age: {{txnAge}} secs</li>
-            <li>Palette id: {{pid?.$oid}}</li>
-            <li>Colors created:{{colorsCreated}}</li>
-        </ul>
-    </div>
-
-    <div class="text-center">
-        <button (click)="createSession()" [disabled]="sid" class="mt-3" mat-raised-button routerLink="/new">
-            <mat-icon class="mr-2">power_settings_new</mat-icon>Create session
-        </button>
-
-        <button (click)="startTxn(sid)" [disabled]='!sid || txn' class="ml-2 mt-3" mat-raised-button color="warn"
-            routerLink="/new">
-            <mat-icon class="mr-2">directions_run</mat-icon>Start txn
-        </button>
-
-        <button (click)="getTxnStatus(sid)" [disabled]='!sid' class="ml-2 mt-3" mat-raised-button routerLink="/new">
-            <mat-icon class="mr-2">info</mat-icon>Get txn status
-        </button>
-
-        <button (click)="createPalette(sid, txn)" [disabled]='!sid || !txn || startCreatingPalette || paletteCreated'
-            class="ml-2 mt-3" mat-raised-button routerLink="/new">
-            <mat-icon class="mr-2">color_lens</mat-icon>Create Palette
-        </button>
-
-        <button (click)="createColors(sid, txn, pid)"
-            [disabled]='!sid || !txn || !pid || startCreatingColors || colorsCreated' class="ml-2 mt-3"
-            mat-raised-button routerLink="/new">
-            <mat-icon class="mr-2">device_hub</mat-icon>Create Linked Colors
-        </button>
-
-        <button (click)="commitTxn(sid, txn)" [disabled]='!sid || !txn || !colorsCreated !! || !paletteCreated'
-            class="ml-2 mt-3" mat-raised-button color="warn" routerLink="/new">
-            <mat-icon class="mr-2">done</mat-icon>Commit txn
-        </button>
-
-        <button (click)="abortTxn(sid, txn)" [disabled]='!sid || !txn' class="ml-2 mt-3" mat-raised-button color="warn"
-            routerLink="/new">
-            <mat-icon class="mr-2">cancel</mat-icon>Abort txt
-        </button>
-    </div>
-
-    <div class="text-center">
-        <button (click)="getData(sid, txn)" [disabled]='!sid || !txn' class="ml-2 mt-3" mat-raised-button
-            routerLink="/new">
-            <mat-icon class="mr-2">done</mat-icon>Get data in txn
-        </button>
-
-        <button (click)="getData(sid)" class="ml-2 mt-3" mat-raised-button routerLink="/new">
-            <mat-icon class="mr-2">done</mat-icon>Get data outside txn
-        </button>
-
-        <button class="mt-3" mat-raised-button class="ml-2 mt-3" (click)="cleartTreminal()">
-            <mat-icon class="mr-2">remove_from_queue</mat-icon>Clear terminal
-        </button>
-
-        <button class="mt-3" mat-raised-button class="ml-2 mt-3" (click)="deleteAllData()" color="warn">
-            <mat-icon class="mr-2">delete</mat-icon>Delete all data outside txn
-        </button>
-
-        <button class="ml-2 mt-3" mat-raised-button routerLink="/palettes" class="ml-2 mt-3">
-            <mat-icon class="mr-2">arrow_back_ios</mat-icon>Back
-        </button>
-    </div>
+    <div class="display-5 mb-3">Create Palette</div>
 </div>
 
-<div class="terminal">
-    <pre>
+<div class="row">
+    <div class="col-5 mr-0">
+        <div class="jumbotron p-2 mb-4">
+            <p class="text-center m-0"><strong>status</strong></p>
+            <ul class="pt-3">
+                <li>Session Id: <span class="small">{{sid}}</span></li>
+                <li>Txn number: {{txn}}</li>
+                <li>Txn age: {{txnAge}} secs</li>
+                <li>Palette id: {{pid?.$oid}}</li>
+                <li>Colors created:{{colorsCreated}}</li>
+            </ul>
+        </div>
+  
+        <div class="text-center">
+            <button (click)="createSession()" [disabled]="sid" class="mt-2" mat-raised-button routerLink="/new">
+                <mat-icon class="mr-2">power_settings_new</mat-icon>Create session
+            </button>
+
+            <button (click)="startTxn(sid)" [disabled]='!sid || txn' class="ml-2 mt-2" mat-raised-button color="warn"
+                routerLink="/new">
+                <mat-icon class="mr-2">directions_run</mat-icon>Start txn
+            </button>
+
+            <button (click)="getTxnStatus(sid)" [disabled]='!sid' class="ml-2 mt-2" mat-raised-button routerLink="/new">
+                <mat-icon class="mr-2">info</mat-icon>Get txn status
+            </button>
+
+        </div>
+
+        <hr class="mt-2 mb-0">
+
+        <div class="text-center">
+            <button (click)="createPalette(sid, txn)"
+                [disabled]='!sid || !txn || startCreatingPalette || paletteCreated' class="ml-2 mt-2" mat-raised-button
+                routerLink="/new">
+                <mat-icon class="mr-2">color_lens</mat-icon>Create Palette
+            </button>
+
+            <button (click)="createColors(sid, txn, pid)"
+                [disabled]='!sid || !txn || !pid || startCreatingColors || colorsCreated' class="ml-2 mt-2"
+                mat-raised-button routerLink="/new">
+                <mat-icon class="mr-2">device_hub</mat-icon>Create Linked Colors
+            </button>
+        </div>
+
+        <hr class="mt-2 mb-0">
+
+        <div class="text-center">
+            <button (click)="commitTxn(sid, txn)" [disabled]='!sid || !txn || !colorsCreated !! || !paletteCreated'
+                class="ml-2 mt-3" mat-raised-button color="warn" routerLink="/new">
+                <mat-icon class="mr-2">done</mat-icon>Commit txn
+            </button>
+
+            <button (click)="abortTxn(sid, txn)" [disabled]='!sid || !txn' class="ml-2 mt-3" mat-raised-button
+                color="warn" routerLink="/new">
+                <mat-icon class="mr-2">cancel</mat-icon>Abort txt
+            </button>
+        </div>
+
+        <hr class="mt-2 mb-0">
+
+        <div class="text-center my-0">
+            <button (click)="getData(sid, txn)" [disabled]='!sid || !txn' class="ml-2 mt-2" mat-raised-button
+                routerLink="/new">
+                <mat-icon class="mr-2">done</mat-icon>Get data in txn
+            </button>
+
+            <button (click)="getData(sid)" class="ml-2 mt-2" mat-raised-button routerLink="/new">
+                <mat-icon class="mr-2">done</mat-icon>Get data outside txn
+            </button>
+
+            <button class="mt-3" mat-raised-button class="ml-2 mt-2" (click)="deleteAllData()" color="warn">
+                <mat-icon class="mr-2">delete</mat-icon>Delete data outside txn
+            </button>
+        </div>
+
+        <hr class="mt-2 mb-0">
+
+        <div class="text-center">
+            <button class="mt-3" mat-raised-button class="ml-2 mt-2" (click)="cleartTreminal()">
+                <mat-icon class="mr-2">remove_from_queue</mat-icon>Clear terminal
+            </button>
+
+            <button class="ml-2 mt-2" mat-raised-button routerLink="/palettes" class="ml-2 mt-3">
+                <mat-icon class="mr-2">arrow_back_ios</mat-icon>Back
+            </button>
+        </div>
+    </div>
+ 
+    <div class="col-7">
+        <div class="terminal">
+            <pre id="terminal-content">
 {{log}}
-    </pre>
+            </pre>
+        </div>
+    </div>
 </div>

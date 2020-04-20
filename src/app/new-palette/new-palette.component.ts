@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, of, interval, timer, Subscription } from 'rxjs';
+import { Observable, of, timer, Subscription } from 'rxjs';
 import { delay, map, mergeMap, catchError } from 'rxjs/operators';
-import { Color, Palette, ObjectId } from 'src/app/model';
+import { ObjectId } from 'src/app/model';
 import { PalettesService } from 'src/app/palettes.service';
 
 @Component({
@@ -36,6 +36,20 @@ export class NewPaletteComponent implements OnInit {
     this.log += msg += '\n';
   }
 
+  scroll(): void {
+    const terminal = document.getElementById('terminal-content');
+
+    of(1).pipe(
+      delay(100),
+      map(() => {
+        terminal.scrollBy({
+          top: 100000,
+          behavior: 'smooth'
+        });
+      }))
+      .subscribe();
+  }
+
   cleartTreminal() {
     this.log = '';
   }
@@ -60,7 +74,8 @@ export class NewPaletteComponent implements OnInit {
             // delay(500),
             map(sid => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /_sessions/${sid}\n`); return sid; }),
             catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; })
-          ))
+          )),
+        map(sid => { this.scroll(); return sid; })
       )
       .subscribe(sid => this.sid = sid);
   }
@@ -95,7 +110,8 @@ export class NewPaletteComponent implements OnInit {
             // delay(500),
             map(txn => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /_sessions/${sid}/_txns/${txn}\n`); return txn; }),
             catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; })
-          ))
+          )),
+        map(txn => { this.scroll(); return txn; })
       )
       .subscribe(txn => this.txn = txn);
   }
@@ -120,12 +136,15 @@ export class NewPaletteComponent implements OnInit {
           .pipe(
             // delay(500),
             map(res => {
-              this.appendLog('HTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2)));
+              this.appendLog('HTTP/1.1 200 OK\n'
+                .concat(JSON.stringify(res, null, 2))
+                .concat('\n'));
 
               return res;
             }),
             catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; })
-          ))
+          )),
+        map(() => { this.scroll(); return null; })
       )
       .subscribe();
   }
@@ -135,8 +154,7 @@ export class NewPaletteComponent implements OnInit {
    * @param txn the txn number
    */
   getData(sid?: string, txn?: string): void {
-    console.log(`getTxnStatus(${sid})`);
-
+    console.log(`getData(${sid}, ${txn})`);
 
     const uriP = sid && txn ? `/palettes?sid=${sid}&txn=${txn}` : `/palettes`;
     const uriC = sid && txn ? `/colors?sid=${sid}&txn=${txn}` : `/colors`;
@@ -157,16 +175,18 @@ export class NewPaletteComponent implements OnInit {
             return res;
           }))
         ),
+        catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; }),
         map(() => { console.log('msg', reqC); this.appendLog(`\n${reqC}`); return null; }),
         mergeMap(() => this.palettesService.get(uriC).pipe(
           // delay(500),
           map(res => {
-            this.appendLog('HTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2)));
+            this.appendLog('HTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2)).concat('\n'));
 
             return res;
           }),
           catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; })
-        ))
+        )),
+        map(() => { this.scroll(); return null; })
       )
       .subscribe();
   }
@@ -201,7 +221,8 @@ export class NewPaletteComponent implements OnInit {
             }),
             map(id => { this.appendLog(`\nHTTP/1.1 201 Created\nLocation: /palettes/${id}\n`); return id; }),
             catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; })
-          ))
+          )),
+        map(p => { this.scroll(); return p; })
       )
       .subscribe(p => {
         this.pid = { $oid: p };
@@ -230,7 +251,8 @@ export class NewPaletteComponent implements OnInit {
         mergeMap(() => this.createColor(sid, txn, pid, colors[1].name, colors[1].hex)),
         mergeMap(() => this.createColor(sid, txn, pid, colors[2].name, colors[2].hex)),
         mergeMap(() => this.createColor(sid, txn, pid, colors[3].name, colors[3].hex)),
-        mergeMap(() => this.createColor(sid, txn, pid, colors[4].name, colors[4].hex))
+        mergeMap(() => this.createColor(sid, txn, pid, colors[4].name, colors[4].hex)),
+        map(() => { this.scroll(); return null; })
       ).subscribe(() => this.colorsCreated = true);
   }
 
@@ -313,7 +335,8 @@ export class NewPaletteComponent implements OnInit {
             // delay(500),
             map(res => { this.appendLog(`HTTP/1.1 200 OK\n`); this.txn = null; return res; }),
             catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; })
-          ))
+          )),
+        map(() => { this.scroll(); return null; })
       )
       .subscribe();
   }
@@ -343,10 +366,10 @@ export class NewPaletteComponent implements OnInit {
             // delay(500),
             map(res => { this.appendLog(`HTTP/1.1 204 No Content\n`); this.resetStatus(); return res; }),
             catchError(res => {
-              console.log('************', res);
               this.appendLog(`HTTP/1.1 400 Bad Request\n`);
               this.txn = null; return [];
-            })))
+            }))),
+        map(() => { this.scroll(); return null; })
       )
       .subscribe();
   }
@@ -384,12 +407,13 @@ export class NewPaletteComponent implements OnInit {
           .pipe(
             // delay(500),
             map(res => {
-              this.appendLog('\nHTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2)));
+              this.appendLog('\nHTTP/1.1 200 OK\n'.concat(JSON.stringify(res, null, 2).concat('\n')));
 
               return res;
             }),
             catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`); this.resetStatus(); return []; }))
-        )
+        ),
+        map(() => { this.scroll(); return null; })
       )
       .subscribe();
   }
