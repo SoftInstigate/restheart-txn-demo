@@ -93,8 +93,8 @@
  
     <div class="col-7">
         <div class="terminal">
-            <pre id="terminal-content">
-{{log}}
+            <pre id="terminal-content" class="text-success">
+<div [ngClass]="log.color" *ngFor="let log of logs">{{log.msg}}</div>
             </pre>
         </div>
     </div>
