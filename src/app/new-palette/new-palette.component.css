@@ -1,3 +1,8 @@
+button {
+    font-size: 20px;
+    font-weight: 300;
+}
+
 .content {
     display: flex;
     margin: 82px auto 0px;

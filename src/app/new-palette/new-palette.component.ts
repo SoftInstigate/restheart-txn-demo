@@ -65,7 +65,7 @@ export class NewPaletteComponent implements OnInit {
 
     of('> POST /_sessions')
       .pipe(
-        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-primary'); return null; }),
+        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
         // Here execute the request
         mergeMap(() => this.palettesService.post('/_sessions', null)
@@ -100,7 +100,7 @@ export class NewPaletteComponent implements OnInit {
 
     of(`> POST /_sessions/${sid}/_txns`)
       .pipe(
-        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-primary'); return null; }),
+        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
         // Here execute the request
         mergeMap(() => this.palettesService.post(`/_sessions/${sid}/_txns`, null)
@@ -131,7 +131,7 @@ export class NewPaletteComponent implements OnInit {
 
     of(`> GET /_sessions/${sid}/_txns`)
       .pipe(
-        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-primary'); return null; }),
+        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
         // Here execute the request
         mergeMap(() => this.palettesService.get(`/_sessions/${sid}/_txns`)
@@ -166,20 +166,20 @@ export class NewPaletteComponent implements OnInit {
 
     of(reqP)
       .pipe(
-        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-primary'); return null; }),
+        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
         // Here execute the request
         mergeMap(() => this.palettesService.get(uriP).pipe(
           // delay(500),
           map(res => {
             this.appendLog('HTTP/1.1 200 OK', 'text-success');
-            this.appendLog(JSON.stringify(res, null, 2), 'text-white');
+            this.appendLog(JSON.stringify(res, null, 2).concat('\n'), 'text-white');
 
             return res;
           }))
         ),
         catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request`, 'text-danger'); this.resetStatus(); return []; }),
-        map(() => { console.log('msg', reqC); this.appendLog(`\n${reqC}`, 'text-primary'); return null; }),
+        map(() => { console.log('msg', reqC); this.appendLog(`${reqC}`, 'text-light bg-primary'); return null; }),
         mergeMap(() => this.palettesService.get(uriC).pipe(
           // delay(500),
           map(res => {
@@ -213,7 +213,7 @@ export class NewPaletteComponent implements OnInit {
 
     of(`> POST /palettes/?sid=${sid}&txn=${txn}\n` + JSON.stringify(palette, null, 2))
       .pipe(
-        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-primary'); return null; }),
+        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
         // Here execute the request
         mergeMap(() => this.palettesService.post(`/palettes/?sid=${sid}&txn=${txn}`, palette)
@@ -223,7 +223,7 @@ export class NewPaletteComponent implements OnInit {
               const loc = resp.headers.get('Location');
               return loc.substring(loc.lastIndexOf('/') + 1);
             }),
-            map(id => { this.appendLog(`\nHTTP/1.1 201 Created\nLocation: /palettes/${id}\n`, 'text-success'); return id; }),
+            map(id => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /palettes/${id}\n`, 'text-success'); return id; }),
             catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`, 'text-danger'); this.resetStatus(); return []; })
           )),
         map(p => { this.scroll(); return p; })
@@ -297,7 +297,7 @@ export class NewPaletteComponent implements OnInit {
 
     return of(`> POST /colors/?sid=${sid}&txn=${txn}\n` + JSON.stringify(color, null, 2))
       .pipe(
-        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-primary'); return str; }),
+        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return str; }),
 
         // Here execute the request
         mergeMap(() => this.palettesService.post(`/colors/?sid=${sid}&txn=${txn}`, color)
@@ -308,7 +308,7 @@ export class NewPaletteComponent implements OnInit {
               const loc = resp.headers.get('Location');
               return loc.substring(loc.lastIndexOf('/') + 1);
             }),
-            map(id => { this.appendLog(`\nHTTP/1.1 201 Created\nLocation: /palettes/${id}\n`, 'text-success'); return { $oid: id }; }),
+            map(id => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /palettes/${id}\n`, 'text-success'); return { $oid: id }; }),
             catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`, 'text-danger'); this.resetStatus(); return []; })
           ))
       );
@@ -330,7 +330,7 @@ export class NewPaletteComponent implements OnInit {
 
     of(`> PATCH /_sessions/${sid}/_txns/${txn}`)
       .pipe(
-        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-primary'); return null; }),
+        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
         // Here execute the request
         mergeMap(() => this.palettesService.patch(`/_sessions/${sid}/_txns/${txn}`, null)
@@ -361,7 +361,7 @@ export class NewPaletteComponent implements OnInit {
 
     of(`> DELETE /_sessions/${sid}/_txns/${txn}`)
       .pipe(
-        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-primary'); return null; }),
+        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
         // Here execute the request
         mergeMap(() => this.palettesService.delete(`/_sessions/${sid}/_txns/${txn}`)
@@ -386,7 +386,7 @@ export class NewPaletteComponent implements OnInit {
 
     of('> DELETE /palettes/*?filter={"$oid":{"$exists":true}}')
       .pipe(
-        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-primary'); return null; }),
+        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
         // Here execute the request
         mergeMap(() => this.palettesService.delete('/palettes/*?filter={"_id":{"$exists":true}}')
@@ -394,17 +394,17 @@ export class NewPaletteComponent implements OnInit {
           .pipe(
             // delay(500),
             map(res => {
-              this.appendLog('\nHTTP/1.1 200 OK', 'text-success');
-              this.appendLog(JSON.stringify(res, null, 2), 'text-white');
+              this.appendLog('HTTP/1.1 200 OK', 'text-success');
+              this.appendLog(JSON.stringify(res, null, 2).concat('\n'), 'text-white');
 
               return res;
             }),
             catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`, 'text-danger'); this.resetStatus(); return res; }))
         ),
 
-        map(res => '\n> DELETE /colors/*?filter={"$oid":{"$exists":true}}'),
+        map(res => '> DELETE /colors/*?filter={"$oid":{"$exists":true}}'),
 
-        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-primary'); return null; }),
+        map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
         // Here execute the request
         mergeMap(() => this.palettesService.delete(`/colors/*?filter={"_id":{"$exists":true}}`)
@@ -412,7 +412,7 @@ export class NewPaletteComponent implements OnInit {
           .pipe(
             // delay(500),
             map(res => {
-              this.appendLog('\nHTTP/1.1 200 OK', 'text-success');
+              this.appendLog('HTTP/1.1 200 OK', 'text-success');
               this.appendLog(JSON.stringify(res, null, 2).concat('\n'), 'text-white');
 
               return res;

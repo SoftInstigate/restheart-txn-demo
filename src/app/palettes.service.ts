@@ -12,7 +12,7 @@ export class PalettesService {
   constructor(private http: HttpClient) { }
 
   loadPalettes(): Observable<Palette[]> {
-    return this.http.get<Palette[]>(this.BASE_URL.concat('/palettes'));
+    return this.http.get<Palette[]>(this.BASE_URL.concat('/palettes?sort={"name":1}'));
   }
 
   loadColors(pid: ObjectId): Observable<Color[]> {
