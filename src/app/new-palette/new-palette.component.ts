@@ -244,7 +244,7 @@ export class NewPaletteComponent implements OnInit {
 
     const colors = this.shuffle([
       { name: 'green', hex: '#66bb6a' },
-      { name: 'pink', hex: '#2196f3' },
+      { name: 'pink', hex: '#ffc2cd' },
       { name: 'blu', hex: '#2196f3' },
       { name: 'lime', hex: '#d4e157' },
       { name: 'red', hex: '#b71c1c' }
