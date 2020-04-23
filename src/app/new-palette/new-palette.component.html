@@ -14,7 +14,7 @@
                 <li>Colors created:{{colorsCreated}}</li>
             </ul>
         </div>
-  
+
         <div class="text-center">
             <button (click)="createSession()" [disabled]="sid" class="mt-2" mat-raised-button routerLink="/new">
                 <mat-icon class="mr-2">power_settings_new</mat-icon>Create session
@@ -90,11 +90,14 @@
             </button>
         </div>
     </div>
- 
+
     <div class="col-7">
         <div class="terminal">
             <pre id="terminal-content" class="text-success">
-<div [ngClass]="log.color" *ngFor="let log of logs">{{log.msg}}</div>
+                <div *ngFor="let log of logs" class="row">
+                <div [ngClass]="log.color"  class="col-11">{{log.msg}}</div>
+                <div class="col-1"><button mat-raised-button (click)="zoom(log)" class="float-right bg-transparent text-white"><mat-icon>zoom_in</mat-icon></button></div>
+            </div>
             </pre>
         </div>
     </div>

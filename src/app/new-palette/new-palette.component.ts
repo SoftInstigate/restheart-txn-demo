@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Observable, of, timer, Subscription } from 'rxjs';
 import { delay, map, mergeMap, catchError } from 'rxjs/operators';
 import { ObjectId } from 'src/app/model';
@@ -30,7 +31,7 @@ export class NewPaletteComponent implements OnInit {
 
   logs: Log[] = [];
 
-  constructor(private palettesService: PalettesService) { }
+  constructor(private palettesService: PalettesService, public dialog: MatDialog) { }
 
   ngOnInit(): void {
   }
@@ -57,6 +58,23 @@ export class NewPaletteComponent implements OnInit {
     this.logs = [];
   }
 
+  truncate(sid: string): string {
+    if (sid) {
+      return sid.substring(0, 8).concat('...');
+    }
+  }
+
+  zoom(msg: string): void {
+    const dialogRef = this.dialog.open(RequestZoomComponent, {
+      width: '1400px',
+      data: msg
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed', result);
+    });
+  }
+
   /**
    * @returns the id of the created session
    */
@@ -75,7 +93,11 @@ export class NewPaletteComponent implements OnInit {
               return loc.substring(loc.lastIndexOf('/') + 1);
             }),
             // delay(500),
-            map(sid => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /_sessions/${sid}\n`, 'text-success'); return sid; }),
+            map(sid => {
+              this.appendLog(`HTTP/1.1 201 Created\nLocation: `
+                + `/_sessions/${this.truncate(sid)}\n`, 'text-success');
+              return sid;
+            }),
             catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`, 'text-danger'); this.resetStatus(); return []; })
           )),
         map(sid => { this.scroll(); return sid; })
@@ -98,7 +120,7 @@ export class NewPaletteComponent implements OnInit {
       return;
     }
 
-    of(`> POST /_sessions/${sid}/_txns`)
+    of(`> POST /_sessions/${this.truncate(sid)}/_txns`)
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
@@ -111,7 +133,11 @@ export class NewPaletteComponent implements OnInit {
               return loc.substring(loc.lastIndexOf('/') + 1);
             }),
             // delay(500),
-            map(txn => { this.appendLog(`HTTP/1.1 201 Created\nLocation: /_sessions/${sid}/_txns/${txn}\n`, 'text-success'); return txn; }),
+            map(txn => {
+              this.appendLog(`HTTP/1.1 201 Created\nLocation: ` +
+                `/_sessions/${this.truncate(sid)}/_txns/${txn}\n`, 'text-success');
+              return txn;
+            }),
             catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request\n`, 'text-danger'); this.resetStatus(); return []; })
           )),
         map(txn => { this.scroll(); return txn; })
@@ -129,7 +155,7 @@ export class NewPaletteComponent implements OnInit {
       return;
     }
 
-    of(`> GET /_sessions/${sid}/_txns`)
+    of(`> GET /_sessions/${this.truncate(sid)}/_txns`)
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
@@ -161,8 +187,8 @@ export class NewPaletteComponent implements OnInit {
     const uriP = sid && txn ? `/palettes?sid=${sid}&txn=${txn}` : `/palettes`;
     const uriC = sid && txn ? `/colors?sid=${sid}&txn=${txn}` : `/colors`;
 
-    const reqP = `> GET ${uriP}`;
-    const reqC = `> GET ${uriC}`;
+    const reqP = sid && txn ? `> GET /palettes?sid=${this.truncate(sid)}&txn=${txn}` : `/palettes`;
+    const reqC = sid && txn ? `> GET /colors?sid=${this.truncate(sid)}&txn=${txn}` : `/colors`;
 
     of(reqP)
       .pipe(
@@ -211,7 +237,7 @@ export class NewPaletteComponent implements OnInit {
 
     const palette = { name: `Transacted Palette ${txn}!` };
 
-    of(`> POST /palettes/?sid=${sid}&txn=${txn}\n` + JSON.stringify(palette, null, 2))
+    of(`> POST /palettes/?sid=${this.truncate(sid)}&txn=${txn}\n` + JSON.stringify(palette, null, 2))
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
@@ -295,7 +321,7 @@ export class NewPaletteComponent implements OnInit {
 
     const color = { name: `${name}`, hex: `${hex}`, palette: { $oid: pid.$oid } };
 
-    return of(`> POST /colors/?sid=${sid}&txn=${txn}\n` + JSON.stringify(color, null, 2))
+    return of(`> POST /colors/?sid=${this.truncate(sid)}&txn=${txn}\n` + JSON.stringify(color, null, 2))
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return str; }),
 
@@ -328,7 +354,7 @@ export class NewPaletteComponent implements OnInit {
       return;
     }
 
-    of(`> PATCH /_sessions/${sid}/_txns/${txn}`)
+    of(`> PATCH /_sessions/${this.truncate(sid)}/_txns/${txn}`)
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
@@ -359,7 +385,7 @@ export class NewPaletteComponent implements OnInit {
       return;
     }
 
-    of(`> DELETE /_sessions/${sid}/_txns/${txn}`)
+    of(`> DELETE /_sessions/${this.truncate(sid)}/_txns/${txn}`)
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
@@ -433,5 +459,20 @@ export class NewPaletteComponent implements OnInit {
     this.colorsCreated = false;
     this.timer.unsubscribe();
     this.txnAge = 0;
+  }
+}
+
+@Component({
+  selector: 'app-request-zoom',
+  templateUrl: './request-zoom.component.html',
+})
+export class RequestZoomComponent {
+
+  constructor(
+    public dialogRef: MatDialogRef<RequestZoomComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any) { }
+
+  close(): void {
+    this.dialogRef.close();
   }
 }

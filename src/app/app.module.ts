@@ -9,17 +9,19 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { HeaderComponent } from './header/header.component';
 import { PalettesComponent } from './palettes/palettes.component';
 import { PaletteComponent } from './palette/palette.component';
-import { NewPaletteComponent } from './new-palette/new-palette.component';
+import { NewPaletteComponent, RequestZoomComponent } from './new-palette/new-palette.component';
 import { PaletteCreationLogComponent } from './palette-creation-log/palette-creation-log.component';
 import { HomeComponent } from './home/home.component';
 import { FooterComponent } from './footer/footer.component';
+import { AboutComponent } from './about/about.component';
 import { AuthInterceptor } from './auth.interceptor';
 
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { AboutComponent } from './about/about.component';
+import { MatDialogModule } from '@angular/material/dialog';
+
 
 @NgModule({
   declarations: [
@@ -28,6 +30,7 @@ import { AboutComponent } from './about/about.component';
     PalettesComponent,
     PaletteComponent,
     NewPaletteComponent,
+    RequestZoomComponent,
     PaletteCreationLogComponent,
     HomeComponent,
     FooterComponent,
@@ -41,7 +44,8 @@ import { AboutComponent } from './about/about.component';
     MatCardModule,
     MatGridListModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatDialogModule
   ],
   providers: [
     {
