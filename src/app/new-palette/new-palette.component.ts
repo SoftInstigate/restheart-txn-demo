@@ -187,8 +187,8 @@ export class NewPaletteComponent implements OnInit {
     const uriP = sid && txn ? `/palettes?sid=${sid}&txn=${txn}` : `/palettes`;
     const uriC = sid && txn ? `/colors?sid=${sid}&txn=${txn}` : `/colors`;
 
-    const reqP = sid && txn ? `> GET /palettes?sid=${this.truncate(sid)}&txn=${txn}` : `/palettes`;
-    const reqC = sid && txn ? `> GET /colors?sid=${this.truncate(sid)}&txn=${txn}` : `/colors`;
+    const reqP = sid && txn ? `> GET /palettes?sid=${this.truncate(sid)}&txn=${txn}` : `> GET /palettes`;
+    const reqC = sid && txn ? `> GET /colors?sid=${this.truncate(sid)}&txn=${txn}` : `> GET /colors`;
 
     of(reqP)
       .pipe(
