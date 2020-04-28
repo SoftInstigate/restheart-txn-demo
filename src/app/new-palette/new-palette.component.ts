@@ -190,12 +190,12 @@ export class NewPaletteComponent implements OnInit {
     const reqP = sid && txn ? `> GET /palettes?sid=${this.truncate(sid)}&txn=${txn}` : `> GET /palettes`;
     const reqC = sid && txn ? `> GET /colors?sid=${this.truncate(sid)}&txn=${txn}` : `> GET /colors`;
 
-    of(reqP)
+    of(reqC)
       .pipe(
         map(str => { console.log('msg', str); this.appendLog(`${str}`, 'text-light bg-primary'); return null; }),
 
         // Here execute the request
-        mergeMap(() => this.palettesService.get(uriP).pipe(
+        mergeMap(() => this.palettesService.get(uriC).pipe(
           // delay(500),
           map(res => {
             this.appendLog('HTTP/1.1 200 OK', 'text-success');
@@ -205,8 +205,8 @@ export class NewPaletteComponent implements OnInit {
           }))
         ),
         catchError(res => { this.appendLog(`HTTP/1.1 400 Bad Request`, 'text-danger'); this.resetStatus(); return []; }),
-        map(() => { console.log('msg', reqC); this.appendLog(`${reqC}`, 'text-light bg-primary'); return null; }),
-        mergeMap(() => this.palettesService.get(uriC).pipe(
+        map(() => { console.log('msg', reqP); this.appendLog(`${reqP}`, 'text-light bg-primary'); return null; }),
+        mergeMap(() => this.palettesService.get(uriP).pipe(
           // delay(500),
           map(res => {
             this.appendLog('HTTP/1.1 200 OK', 'text-success');
