@@ -38,30 +38,25 @@
     </a>
 </div>
 
-<h2 class="mt-4 mb-0 display-5">1 - Dowload RESTHeart Platform</h2>
-<p class="p-0 m-0 text-muted">free trial version</p>
-<a class="mt-3 display-6" href="https://restheart.org/get#platform">https://restheart.org/get#platform</a>
 
-<h2 class="mt-4 mb-0 display-5">2- Start RESTHeart Platform</h2>
+<h2 class="mt-4 mb-0 display-5">1- Start RESTHeart <span class="text-muted">(v >= 5.1)</span></h2>
 <p class="p-0 m-0 text-muted">using Docker</p>
+<p class="p-0 m-0 text-muted">Alternatively get the binary at <a class="mt-3" href="https://restheart.org/get">https://restheart.org/get</a></p>
 <div class="terminal">
   <pre>
-$ unzip restheart-platform-[version].zip
-$ cd restheart-platform-[version].zip
+$ mkdir restheart && cd restheart
+$ curl https://raw.githubusercontent.com/SoftInstigate/restheart/master/docker-compose.yml --output docker-compose.yml
 $ docker-compose up -d
   </pre>
 </div>
 
-<h2 class="mt-4 mb-0 display-5">3 - Accept License</h2>
-<a class="mt-3 display-6" href="https://restheart.org/docs/setup/#accept-license">https://restheart.org/docs/setup/#accept-license</a>
-
-<h2 class="mt-4 mb-0">4 - Init</h2>
-<p class="p-0 m-0 text-muted">using Httpie</p>
+<h2 class="mt-4 mb-0">2 - Create db and collections</h2>
+<p class="p-0 m-0 text-muted">using curl</p>
 
 <div class="terminal">
   <pre>
-$ http -a admin:secret PUT :8080/
-$ http -a admin:secret PUT :8080/palettes
-$ http -a admin:secret PUT :8080/colors
+$ curl -u admin:secret -v -X PUT :8080/
+$ curl -u admin:secret -v -X PUT :8080/palettes
+$ curl -u admin:secret -v -X PUT :8080/colors
   </pre>
 </div>
