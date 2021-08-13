@@ -123,5 +123,8 @@
       }
     }
   },
-  "defaultProject": "restheart-txn-demo"
+  "defaultProject": "restheart-txn-demo",
+  "cli": {
+    "analytics": false
+  }
 }
